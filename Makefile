@@ -1,8 +1,3 @@
-
-FRONTENDS := $(wildcard frontends/*)
-COMPONENTS := $(wildcard components/*)
-CWD := $(shell pwd)
-
 checkout:
 	git pull --rebase
 	git submodule update --init
@@ -21,11 +16,7 @@ build-kiosk-browser:
 	sudo dpkg -i kiosk-browser/out/make/deb/x64/kiosk-browser_*_amd64.deb
 
 build: build-kiosk-browser patch
-	$(foreach component, $(COMPONENTS), \
-		make -C $(component) install; \
-		PIPENV_VENV_IN_PROJECT=1 make -C $(component) build; \
-	)
-	$(foreach frontend, $(FRONTENDS), \
-		PIPENV_VENV_IN_PROJECT=1 make -C $(frontend) build; \
-	)
+	bash ./build.sh all
 
+clean:
+	rm -rf build

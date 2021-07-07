@@ -1,9 +1,6 @@
 # Vx Complete System
 
-This repository is used to download a set of components (bms, bas,
-ems, bsd, module-\*) that are consistent with each other in terms of
-compatibility and versioning. This repository has all the components
-and scripts to run each machine (BMD, BAS, BSD, EMS).
+This repository is used to download a set of components that are consistent with each other in terms of compatibility and versioning. This repository has all the components and scripts to run each machine (BMD, BAS, BSD, EMS).
 
 ## Hardware and OS
 
@@ -29,33 +26,64 @@ make checkout
 make build
 ```
 
-## Run in Development
+## Run in Test Mode
 
-You can now run the services needed for any of the systems as follows:
+You now have a test machine that can run any of the VxSuite components
+(election manager, ballot scanner, BMD, or encoder). _You can only run
+one component at a time_.
 
-```
-bash run-election-manager.sh
-```
+### Election Manager
 
-```
-bash run-bsd.sh
-```
+This command will run all software services needed for election manager:
 
 ```
-bash run-bmd.sh
+./run.sh election-manager
 ```
 
-```
-bash run-bas.sh
-```
+### Ballot Scanner
 
-Once the services are running, start the Kiosk Browser:
+This command will run all software services needed for ballot scanner:
 
 ```
-bash run-kiosk-browser.sh
+./run.sh bsd
 ```
 
-You're good to go. You can exit the Kiosk Browser with Ctrl-W.
+### Precinct Scanner
+
+This requires some other packages to be installed that, unfortunately, are not
+public. If you have access, go to https://github.com/votingworks/plustekctl and
+follow the install instructions. Once you've done that, this command will run
+all software services needed for precinct scanner:
+
+```
+./run.sh precinct-scanner
+```
+
+### Ballot Marking Device
+
+There are 3 modes:
+
+- `VxMark`: the BMD is used just for electronic marking and stores the ballot on the smart card
+- `VxPrint`: this is the print station that takes a smart card with a ballot on it and prints it
+- `VxMark + VxPrint`: the more classic BMD, mark on the screen and immediately print the ballot.
+
+The default mode is `VxMark`.
+
+This command will run all software services needed for the
+ballot-marking device, in the given mode. Make sure to substitute your
+chosen mode (`VxMark`, `VxPrint`, `VxMark + VxPrint`) in the command:
+
+```
+VX_APP_MODE="<mode>" ./run.sh bmd
+```
+
+### Encoder
+
+This command will run all software services needed for the smart-card encoder:
+
+```
+./run.sh bas
+```
 
 ## Configuring for Production
 
@@ -69,7 +97,7 @@ bash setup-machine.sh
 
 ## High-level Contracts
 
-Each front-end system, `bms`, `bas`, `ems`, and `bsd`, and each
+Each front-end system, e.g. `bmd`, `bas`, etc., and each
 module, e.g. `module-smartcards`, `module-scan`, etc., should be an
 application that can be built using `make build`, and then run using
 `make run`.
