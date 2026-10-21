@@ -1,13 +1,88 @@
+trap '' SIGINT SIGTSTP SIGQUIT
+
 xset -dpms
 xset s off
 xset s noblank
 xrdb ~/.Xresources
+xmodmap ~/.Xmodmap
 
-bash /vx-ui/.vx/run-kiosk-browser-forever-and-log.sh &
+export VX_CONFIG_ROOT="/vx/config"
+export VX_METADATA_ROOT="/vx/code"
+
+# delay until X is started and configured
+# this appears to fix the issue where, sometimes, the Elo touchscreen doesn't respond
+(sleep 6 && bash /vx/code/run-kiosk-browser-forever-and-log.sh) &
+
+# Device specific configurations
+ELO="Elo Touch"
+VSAP155="PENMOUNT PM2501"
+VSAP150="PenMount PM1415"
+
+( sleep 4 && if xinput list | grep -i "$ELO" > /dev/null; then
+  pulseaudio --start
+  # Set the screen brightness (brightness is ID 10) to 70%
+  ddcutil setvcp 10 70
+
+  # [VxMark] Rotate display
+  # The coordinate transformation matrix is now in /etc/X11/xorg.conf.d/10-vxmark-transform-matrix.conf
+  if cat $VX_CONFIG_ROOT/machine-type | grep "^mark$" > /dev/null; then
+    xrandr -o left
+  fi
+elif xinput list | grep -i "$VSAP150" > /dev/null; then
+  # Rotate mark-scan screen to portrait
+  xrandr -o left
+  xinput set-prop "$VSAP150" 'Coordinate Transformation Matrix' 0 -1 1 1 0 0 0 0 1
+  pulseaudio --start
+  amixer -c0 set Speaker 0% mute
+  amixer -c0 set Headphone 100% unmute
+  amixer set Master 100% unmute
+  pactl set-sink-volume 0 75%
+elif xinput list | grep -i "$VSAP155" > /dev/null; then
+  # Rotate mark-scan screen to portrait
+  xrandr -o left
+  xinput set-prop "$VSAP155" 'Coordinate Transformation Matrix' 0 -1 1 1 0 0 0 0 1
+  pulseaudio --start
+  amixer -c0 set Speaker 0% mute
+  amixer -c0 set Headphone 100% unmute
+  amixer set Master 100% unmute
+  pactl set-sink-volume 0 75%
+else
+  echo "No screen condition matched"
+fi
+
+# prevent suspending the module, otherwise the start of chimes gets clipped
+pactl unload-module module-suspend-on-idle
+
+# we need a startup chime to activate the channel
+# delay because it appears the xrandr and xinput commands above turn off sound for a bit
+# (because of course they do)
+#
+# NOTE: On VxMark, the startup chime is played through the speakers from within
+# the app server, so we instead play a shortened version here through the
+# headphones, to activate the headphone audio device.
+if cat $VX_CONFIG_ROOT/machine-type | grep "^mark$" > /dev/null; then
+  # On VxMark, the app server owns volume setting so don't set anything here
+  # that might conflict
+  sleep 2 && aplay ~/chime-short.wav
+else
+  sleep 5 && aplay ~/chime.wav && pactl set-sink-volume 0 100%
+fi
+) &
+
+# look for an external display and mirror to it
+(while true; do
+     sleep 5
+
+     if xrandr | grep "HDMI-1 connected"; then
+	 xrandr --output HDMI-1 --mode 1920x1080 --same-as eDP-1 > /dev/null
+
+	 # once this is done, we don't need to loop anymore
+	 # the setting will survive unplug/replug until next reboot
+	 break
+     fi
+ done) &
 
 # brightness all the way
 sudo brightnessctl s 100%
 
 exec /usr/bin/openbox-session
-
-

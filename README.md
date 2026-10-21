@@ -1,85 +1,14 @@
-# Vx Complete System
+# VxSuite Complete System
 
-This repository is used to download a set of components (bms, bas,
-ems, bsd, module-\*) that are consistent with each other in terms of
-compatibility and versioning. This repository has all the components
-and scripts to run each machine (BMD, BAS, BSD, EMS).
+VxSuite is the VotingWorks paper-ballot voting system. This repo includes configuration code for production machines. Its contents are being migrated to https://github.com/votingworks/vxsuite-build-system and https://github.com/votingworks/vxsuite. Once that migration is complete, this repo will be archived.
 
-## Hardware and OS
+The entry point for creating a production machine, after all dependencies have been installed and source code has been built, is the `setup-machine.sh` script. This script is irreversible and should not be run on your development machine.
 
-Pick a machine with FHD (1920x1080) resolution and the ability to install Linux.
-Install [Ubuntu 18.04.4+ Desktop](https://releases.ubuntu.com/18.04.5/), minimal
-installation. Software update.
+## Development
 
-## Install VotingWorks Software
+View our contribution guidelines [here](https://github.com/votingworks/contribution-guidelines).
 
-```
-sudo apt update
-sudo apt install git make
-git clone https://github.com/votingworks/vxsuite-complete-system
-cd vxsuite-complete-system
-make node
-```
+## License
 
-Then pull down all of the code. You can re-run these commands to pull
-the latest version of the code.
-
-```
-make checkout
-make build
-```
-
-## Run in Development
-
-You can now run the services needed for any of the systems as follows:
-
-```
-bash run-election-manager.sh
-```
-
-```
-bash run-bsd.sh
-```
-
-```
-bash run-bmd.sh
-```
-
-```
-bash run-bas.sh
-```
-
-Once the services are running, start the Kiosk Browser:
-
-```
-bash run-kiosk-browser.sh
-```
-
-You're good to go. You can exit the Kiosk Browser with Ctrl-W.
-
-## Configuring for Production
-
-To configure and lock down the machine for production use, noting
-this is an irreversible process:
-
-```
-cd vxsuite-complete-system
-bash setup-machine.sh
-```
-
-## High-level Contracts
-
-Each front-end system, `bms`, `bas`, `ems`, and `bsd`, and each
-module, e.g. `module-smartcards`, `module-scan`, etc., should be an
-application that can be built using `make build`, and then run using
-`make run`.
-
-## Code Layout & Build
-
-Each component is a git submodule. We use submodules here because they
-are exactly what we need: a pointer to a particular commit of each of
-the combined repositories.
-
-We use git submodules here for the components, for the express purpose
-that we never want to update one of the components without explicitly
-checking that all the modules work well together.
+All files are licensed under GNU GPL v3.0 only. Refer to the [license file](./LICENSE) for
+more information.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Clean up build and log files
+DefaultDependencies=no
+Before=shutdown.target reboot.target umount.target
+ConditionVirtualization=yes
+
+[Service]
+Type=oneshot
+ExecStart=/var/opt/vx-cleanup.sh
+RemainAfterExit=no
+
+[Install]
+WantedBy=shutdown.target reboot.target

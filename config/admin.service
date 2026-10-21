@@ -1,0 +1,17 @@
+[Unit]
+Description=VotingWorks Election Manager
+
+[Service]
+Type=simple
+User=vx-services
+Environment=VX_CONFIG_ROOT=/vx/config
+Environment=VX_METADATA_ROOT=/vx/code
+Environment=MODULE_SEMS_CONVERTER_WORKSPACE=/vx/data/module-sems-converter
+Environment=ADMIN_WORKSPACE=/vx/data/admin-service
+ExecStart=/bin/bash /vx/code/run-admin.sh
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=votingworksapp
+
+[Install]
+WantedBy=multi-user.target

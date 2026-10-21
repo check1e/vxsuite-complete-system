@@ -1,0 +1,14 @@
+[Unit]
+Description=Run fstrim once after setup-machine initiates a reboot/shutdown
+DefaultDependencies=no
+Before=shutdown.target reboot.target umount.target
+Requires=vx-cleanup.service
+After=vx-cleanup.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '/sbin/fstrim -av && systemctl disable vm-fstrim.service'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=shutdown.target reboot.target
